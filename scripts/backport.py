@@ -289,6 +289,19 @@ for commit_sha, commit_title in main_commits:
 
     pull = pulls[0]
 
+    # If a commit with the same title is already in the branch, mark the PR with
+    # a corresponding tag. This makes it easier to check what was backported
+    # when looking at the release milestone. Note that we do this before other
+    # checks -- maybe it was backported manually regardless of the usual
+    # conditions.
+    if commit_title in branch_commit_titles:
+        print(f"{commit_sha[:9]} '{commit_title}' is already in the branch.")
+
+        if backported_label not in {label.name for label in pull.labels}:
+            pull.add_to_labels(backported_label)
+
+        continue
+
     # Next, we're going to look at the labels of both the PR and the linked
     # issue, if any, to understand whether we should backport the fix. We have
     # labels to request backport like "bug", and labels to prevent backport
@@ -320,17 +333,6 @@ for commit_sha, commit_title in main_commits:
     ):
         print(f"{commit_sha[:9]} '{commit_title}' will be considered for backporting.")
     else:
-        continue
-
-    # If a commit with the same title is already in the branch, mark the PR with
-    # a corresponding tag. This makes it easier to check what was backported
-    # when looking at the release milestone.
-    if commit_title in branch_commit_titles:
-        print(f"{commit_sha[:9]} '{commit_title}' is already in the branch.")
-
-        if backported_label not in {label.name for label in pull.labels}:
-            pull.add_to_labels(backported_label)
-
         continue
 
     # Remember the PR and the corresponding resulting commit in main.

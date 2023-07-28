@@ -48,8 +48,8 @@ jobs:
 
     - name: Build TimescaleDB
       run: |
-        set -xeu
-        find / -name "postgres.h"
+        set -x
+        # find / -name "postgres.h"
         ./bootstrap -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         make -j$(nproc) -C build
         sudo make -C build install
